@@ -7,11 +7,11 @@ This project implements a **Spam Detection System** using machine learning in a 
 Before running the project, make sure to install the following dependencies:
 
 Python Libraries:
-**Flask** - For creating the web application.
-**scikit-learn** - For machine learning algorithms and model handling.
-**zmq** - For implementing the server-client communication.
-**joblib** - For loading pre-trained machine learning models.
-**nltk** - For natural language processing.
+- **Flask** - For creating the web application.
+- **scikit-learn** - For machine learning algorithms and model handling.
+- **zmq** - For implementing the server-client communication.
+- **joblib** - For loading pre-trained machine learning models.
+- **nltk** - For natural language processing.
 
 To install the required libraries, you can run:
 
