@@ -1,39 +1,42 @@
 from flask import Flask, render_template, request
 import joblib
-import openai
 from dotenv import load_dotenv
 import os
-
-# Load environment variables
-load_dotenv()
+import replicate
 
 # Load model and vectorizer
 model = joblib.load('spam_detector.pkl')
 vectorizer = joblib.load('vectorizer.pkl')
 
-# Set OpenAI API key from .env
-openai.api_key = os.getenv("OPENAI_API_KEY")
+load_dotenv()
+os.environ["REPLICATE_API_TOKEN"] = os.getenv("REPLICATE_API_TOKEN")
 
-# Initialize Flask app
 app = Flask(__name__)
 
-def get_llm_advice_openai(message, result):
+def get_llm_advice_replicate(message, result):
     try:
-        # Construct the prompt
-        prompt = f"The message is classified as '{result}'. Provide advice on how to handle this in brief."
-        
-        # Call OpenAI API
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",  # You can replace with other models like "gpt-4"
-            messages=[
-                {"role": "system", "content": "You are a helpful assistant."},
-                {"role": "user", "content": prompt}
-            ]
+        # Define the pre-prompt and user prompt
+        pre_prompt = (
+            "You are a helpful assistant. You provide advice based on spam classification. "
+            "Do not respond as 'User' or pretend to be 'User'. You only respond as 'Assistant'."
         )
-        
-        # Extract response content
-        advice = response['choices'][0]['message']['content']
-        return advice
+        user_prompt = f"How to deal with '{result}' messages? Provide brief suggestions on how to handle this"
+
+        # Call the Replicate API
+        output = replicate.run(
+            "a16z-infra/llama13b-v2-chat:df7690f1994d94e96ad9d568eac121aecf50684a0b0963b25a41cc40061269e5",
+            input={
+                "prompt": f"{pre_prompt} {user_prompt} Assistant:",
+                "temperature": 0.1,
+                "top_p": 0.9,
+                "max_length": 128,
+                "repetition_penalty": 1,
+            },
+        )
+
+        # Combine the output if it's streamed
+        full_response = "".join(output)
+        return full_response
     except Exception as e:
         return f"Error fetching advice: {str(e)}"
 
@@ -45,15 +48,15 @@ def index():
     if request.method == "POST":
         # Get message from the form
         input_message = request.form["message"]
-        
+
         # Predict using the model
         X = vectorizer.transform([input_message])
         prediction = model.predict(X)[0]
         result = "Spam" if prediction == 1 else "Not Spam"
-        
-        # Get advice from OpenAI LLM
-        llm_advice = get_llm_advice_openai(input_message, result)
-    
+
+        # Get advice from LLM via Replicate API
+        llm_advice = get_llm_advice_replicate(input_message, result)
+
     return render_template("index.html", result=result, input_message=input_message, llm_advice=llm_advice)
 
 if __name__ == "__main__":
