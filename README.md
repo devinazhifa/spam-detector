@@ -1,7 +1,7 @@
 
-# Real-Time Spam Detector Using Machine Learning
+# Real-Time Spam Detector
 
-This project implements a **Spam Detection System** using machine learning in a **server-client architecture** with **ZeroMQ** for communication. It uses **Multinomial Naive Bayes** for spam classification and provides a simple web interface built with Flask for real-time spam detection.
+This project implements a **Spam Detection System** using machine learning in a **server-client architecture** with **ZeroMQ** for communication. It uses **Multinomial Naive Bayes** for spam classification and integrates **Large Language Model (LLM)** from Replicate to provide additional insights and advice based on the classification results. The project also features a simple web interface for real-time spam detection.
 
 ## Requirements
 Before running the project, make sure to install the following dependencies:
@@ -12,11 +12,12 @@ Python Libraries:
 - **zmq** - For implementing the server-client communication.
 - **joblib** - For loading pre-trained machine learning models.
 - **nltk** - For natural language processing.
+- **requests** - For making API calls to the Replicate service.
 
 To install the required libraries, you can run:
 
 ```bash
-pip install flask scikit-learn zmq joblib nltk
+pip install flask scikit-learn zmq joblib nltk requests
 ```
 
 ## Steps to Run the Project
@@ -26,17 +27,13 @@ git clone https://github.com/devinazhifa/spam-detector.git
 cd spam-detector
 ```
 
-**2. Start the Server**
+**2. Set Up the Environment**
+Create a .env file in the project directory and add your Replicate API key:
 ```bash
-python server.py
+REPLICATE_API_TOKEN=your_replicate_api_key
 ```
 
-**3. Start the Client**
-```bash
-python client.py
-```
-
-**4. Start the Web Interface**
+**3. Start the Web Interface**
 ```bash
 python app.py
 ```
